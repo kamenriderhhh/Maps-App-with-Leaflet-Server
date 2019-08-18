@@ -1,19 +1,21 @@
 const mqtt = require('mqtt');
-const db = require('./db');
-const curLoc = db.get('curLocation');
+const db = require('../db');
+const config = require('../config/config');
+
+const CurLocation = db.get('curLocation');
 
 class MqttHandler {
   constructor() {
     this.mqttClient = null;
-    this.host = 'mqtt://52.221.214.117';
-    this.username = 'sailnav'; // mqtt credentials if these are needed to connect
-    this.password = 'usm2019';
+    this.host = config.MQTT[0];
+    this.username = config.MQTT[1];
+    this.password = config.MQTT[2];
   }
   
   connect() {
     // Connect mqtt with credentials (in case of needed, otherwise we can omit 2nd param)
     //this.mqttClient = mqtt.connect(this.host, { username: this.username, password: this.password });
-    this.mqttClient = mqtt.connect(this.host, { username: this.username, password: this.password }, 1883);
+    this.mqttClient = mqtt.connect(this.host, { username: this.username, password: this.password }, config.MQTT[3]);
 
     // Mqtt error calback
     this.mqttClient.on('error', (err) => {
@@ -43,7 +45,7 @@ class MqttHandler {
         date: new Date()
       };
       //console.log(boatLocation);
-      curLoc.insert(boatLocation);
+      CurLocation.insert(boatLocation);
     });
 
     this.mqttClient.on('close', () => {
